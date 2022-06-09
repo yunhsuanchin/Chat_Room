@@ -8,9 +8,17 @@ class PrivateUserRepository {
   }
 
   joinRoom (id, username, room) {
-    this.currentUsers.set(username, { id, room })
+    this.currentUsers.set(id, { username, room })
 
-    return this.currentUsers.get(username)
+    return this.getActiveUser(id)
+  }
+
+  getActiveUser (id) {
+    return this.currentUsers.get(id)
+  }
+
+  leaveRoom (id) {
+    this.currentUsers.delete(id)
   }
 }
 

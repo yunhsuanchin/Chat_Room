@@ -27,7 +27,9 @@ io.on('connection', socket => {
 
       socket.join(user.room)
 
-      socket.to(room).emit('botMessage', `${username} Has Joined the Room.`)
+      socket
+        .to(room)
+        .emit('botMessage', `${user.username} Has Joined the Room.`)
     } else {
       const currentChatRooms = chatRoomRepository.getCurrentChatRooms()
       socket.emit(
@@ -45,6 +47,16 @@ io.on('connection', socket => {
 
   socket.on('chat', input => {
     socket.broadcast.emit('botMessage', input)
+  })
+
+  socket.on('disconnect', () => {
+    const user = userRepository.getActiveUser(socket.id)
+
+    if (user) {
+      socket
+        .to(user.room)
+        .emit('botMessage', `${user.username} Has Left the Room`)
+    }
   })
 })
 
