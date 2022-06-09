@@ -7,18 +7,27 @@ class PrivateUserRepository {
     this.currentUsers = new Map()
   }
 
-  joinRoom (id, username, room) {
-    this.currentUsers.set(id, { username, room })
-
-    return this.getActiveUser(id)
+  getCurrentUsers () {
+    return Array.from(this.currentUsers.values()).map(user => user.username)
   }
 
   getActiveUser (id) {
     return this.currentUsers.get(id)
   }
 
+  joinRoom (id, username, room) {
+    this.currentUsers.set(id, { username, room })
+    return this.getActiveUser(id)
+  }
+
   leaveRoom (id) {
     this.currentUsers.delete(id)
+  }
+
+  userConnect (id, username) {
+    console.log(this.currentUsers)
+    this.currentUsers.set(id, { username })
+    return this.getActiveUser(id)
   }
 }
 
