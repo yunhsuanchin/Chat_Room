@@ -3,36 +3,33 @@ const readline = require('readline').createInterface({
   input: process.stdin,
   output: process.stdout
 })
-
+const clientMessage = require('./messages/clientMessages')
 const chatRoomRepository = require('./repositories/chatRooms')
 const userRepository = require('./repositories/users')
 
 const socket = io('http://localhost:3000')
 
-socket.emit('question', ans => {
-  console.log({ ans })
-})
-
 socket.on('connect', () => {
-  readline.question(`What's Your Name? `, username => {
-    console.log(`Hi ${username}! Let's Start Chatting.`)
-
+  readline.question(clientMessage.nameQuestion, username => {
+    console.log(clientMessage.welcomeMsg(username))
     socket.emit('userConnected', username)
 
-    readline.question(
-      `What Do You Aiming For?\n> A. Chatting With Somebody\n> B. Group Chatting`,
-      onConnectQuestion
-    )
+    setTimeout(() => {
+      readline.question(clientMessage.purposeQuestion(), ans => {
+        handlePurposeSelected(ans, username)
+      })
+    }, 500)
   })
 })
 
 readline.on('line', input => {
+  console.log('readline', input)
   // // bot
   // if (input.includes('bot')) {
   //   readline.question(``)
   // }
 
-  socket.emit('privateMessage', { content, to: username })
+  // socket.emit('privateMessage', { content, to: username })
 
   // socket.emit('groupChat', input)
 })
@@ -45,31 +42,66 @@ socket.on('botMessage', message => {
   console.log(message)
 })
 
-const handleReselection = () => {}
+// const handleReselection = () => {}
 
-const onConnectQuestion = answer => {
+// const resolveQuestion = question => {
+//   return new Promise(resolve => {
+//     readline.question(question, answer => resolve(answer))
+//   })
+// }
+
+// const resolveWriteMsg = message => {
+//   return new Promise(resolve => {
+//     readline.write(message)
+//   })
+// }
+
+const handlePurposeSelected = (answer, username) => {
   if (answer.toUpperCase() === 'A') {
-    const currentUsers = userRepository.getCurrentUsers()
-
-    readline.question(`These Friends Are Waiting For You To Chat With.`)
+    handlePrivateChat(username)
   } else if (answer.toUpperCase() === 'B') {
-    const currentChatRooms = chatRoomRepository.getCurrentChatRooms()
-
-    readline.question(
-      `Please Select a Topic You Are Interested In!\n> ${currentChatRooms.join(
-        ', '
-      )} `,
-      room => {
-        socket.emit('joinRoom', {
-          username: username.trim(),
-          room: room.trim()
-        })
-      }
-    )
+    handleChatRoom(username)
   } else {
-    readline.question(
-      `Your Answer Was Too Ambiguous, Please Choose Again`,
-      onConnectQuestion
+    console.log(clientMessage.invalidWarningMsg)
+    setTimeout(() => {
+      readline.question(clientMessage.purposeQuestion(), handlePurposeSelected)
+    }, 500)
+  }
+}
+
+const handleChatRoom = username => {
+  const currentChatRooms = chatRoomRepository.getCurrentChatRooms()
+
+  readline.question(clientMessage.topicQuestion(currentChatRooms), room => {
+    socket.emit('joinRoom', {
+      username: username.trim().toUpperCase(),
+      room: room.trim().toUpperCase()
+    })
+  })
+}
+
+const handlePrivateChat = username => {
+  const currentUsers = userRepository.getCurrentUsers()
+  console.log({ currentUsers })
+
+  if (currentUsers.length) {
+    readline.question(clientMessage.usersList(currentUsers), selectedUser => {
+      handleUserSelected(username, selectedUser, currentUsers)
+    })
+  } else {
+    console.log(clientMessage.noUserMsg)
+    setTimeout(() => {
+      handleChatRoom(username)
+    }, 500)
+  }
+}
+
+const handleUserSelected = (username, selectedUser, currentUsers) => {
+  if (
+    currentUsers.some(
+      user => user.username === selectedUser.trim().toUpperCase()
     )
+  ) {
+    console.log(clientMessage.matchingUser)
   }
 }

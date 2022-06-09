@@ -1,8 +1,9 @@
 const userRepository = require('../repositories/users')
+const chatRoomRepository = require('../repositories/chatRooms')
 
 module.exports = (io, socket) => {
   const onUserConnected = username => {
-    userRepository.userContent(socket.id, username)
+    userRepository.userConnect(socket.id, username)
   }
 
   const onUserJoinRoom = ({ username, room }) => {

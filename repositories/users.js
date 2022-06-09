@@ -1,32 +1,34 @@
 const INIT_USERS = ['user001', 'user002', 'user003', 'user004']
 
+const currentUsers = new Map()
+
 class PrivateUserRepository {
   constructor () {
     this.message = 'I am an instance'
-
-    this.currentUsers = new Map()
   }
 
   getCurrentUsers () {
-    return Array.from(this.currentUsers.values()).map(user => user.username)
+    console.log('get', currentUsers)
+    return Array.from(currentUsers.values())
   }
 
   getActiveUser (id) {
-    return this.currentUsers.get(id)
+    return currentUsers.get(id)
   }
 
   joinRoom (id, username, room) {
-    this.currentUsers.set(id, { username, room })
+    currentUsers.set(id, { username, room })
     return this.getActiveUser(id)
   }
 
   leaveRoom (id) {
-    this.currentUsers.delete(id)
+    currentUsers.delete(id)
   }
 
   userConnect (id, username) {
-    console.log(this.currentUsers)
-    this.currentUsers.set(id, { username })
+    currentUsers.set(id, { username })
+    console.log('set', currentUsers)
+
     return this.getActiveUser(id)
   }
 }
