@@ -1,17 +1,17 @@
-const userRepository = require('../repositories/users')
-const chatRoomRepository = require('../repositories/chatRooms')
+const userService = require('../services/userService')
+const chatRoomService = require('../services/chatRoomService')
 
 module.exports = (io, socket) => {
   const onUserConnected = username => {
-    userRepository.userConnect(socket.id, username)
+    userService.userConnect(socket.id, username)
   }
 
   const onUserJoinRoom = ({ username, room }) => {
     // 確認 room 是否可進入
-    const isRoomAvailable = chatRoomRepository.checkRoomAvailability(room)
+    const isRoomAvailable = chatRoomService.checkRoomAvailability(room)
 
     if (isRoomAvailable) {
-      const user = userRepository.joinRoom(socket.id, username, room)
+      const user = userService.joinRoom(socket.id, username, room)
 
       socket.join(user.room)
 
@@ -19,7 +19,7 @@ module.exports = (io, socket) => {
         .to(room)
         .emit('botMessage', `${user.username} Has Joined the Room.`)
     } else {
-      const currentChatRooms = chatRoomRepository.getCurrentChatRooms()
+      const currentChatRooms = chatRoomService.getCurrentChatRooms()
       socket.emit(
         'botMessage',
         `${room} Is Coming Soon! Stay Tuned.\nNow Please Choose Another Topic.\n> ${currentChatRooms.join(
@@ -30,13 +30,13 @@ module.exports = (io, socket) => {
   }
 
   const onGroupChat = input => {
-    const user = userRepository.getActiveUser(socket.id)
+    const user = userService.getActiveUser(socket.id)
 
     socket.to(user.room).emit('chatMessage', input)
   }
 
   const onUserDisconnected = () => {
-    const user = userRepository.getActiveUser(socket.id)
+    const user = userService.getActiveUser(socket.id)
 
     if (user) {
       socket

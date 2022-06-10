@@ -18,7 +18,6 @@ class PrivateUserRepository {
 
   joinRoom (id, username, room) {
     currentUsers.set(id, { username, room })
-    return this.getActiveUser(id)
   }
 
   leaveRoom (id) {

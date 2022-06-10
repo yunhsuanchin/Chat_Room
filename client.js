@@ -3,9 +3,9 @@ const readline = require('readline').createInterface({
   input: process.stdin,
   output: process.stdout
 })
-const clientMessage = require('./messages/clientMessages')
-const chatRoomRepository = require('./repositories/chatRooms')
-const userRepository = require('./repositories/users')
+const clientMessage = require('./src/messages/clientMessages')
+const chatRoomService = require('./services/chatRoomService')
+const userService = require('./services/userService')
 
 const socket = io('http://localhost:3000')
 
@@ -70,7 +70,7 @@ const handlePurposeSelected = (answer, username) => {
 }
 
 const handleChatRoom = username => {
-  const currentChatRooms = chatRoomRepository.getCurrentChatRooms()
+  const currentChatRooms = chatRoomService.getCurrentChatRooms()
 
   readline.question(clientMessage.topicQuestion(currentChatRooms), room => {
     socket.emit('joinRoom', {
@@ -81,7 +81,7 @@ const handleChatRoom = username => {
 }
 
 const handlePrivateChat = username => {
-  const currentUsers = userRepository.getCurrentUsers()
+  const currentUsers = userService.getCurrentUsers()
   console.log({ currentUsers })
 
   if (currentUsers.length) {
