@@ -10,7 +10,7 @@ class PrivateChatRoomService {
   }
 
   checkRoomAvailability (room) {
-    return chatRoomRepository.checkRoomAvailability(room)
+    return chatRoomRepository.checkRoomAvailability(room.trim().toUpperCase())
   }
 }
 

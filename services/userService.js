@@ -5,26 +5,25 @@ class PrivateUserService {
     this.message = 'I am an instance'
   }
 
-  getCurrentUsers () {
-    return userRepository.getCurrentUsers()
+  getActiveUsers () {
+    return userRepository.getActiveUsers()
   }
 
   getActiveUser (id) {
     return userRepository.getActiveUser(id)
   }
 
-  joinRoom (id, username, room) {
-    userRepository.joinRoom(id, username, room)
-    return this.getActiveUser(id)
+  userConnect (id, username, room) {
+    userRepository.userConnect(id, username, room)
+    console.log('currentUsers', this.getActiveUsers())
+  }
+
+  updateUserRoom (id, room) {
+    userRepository.updateUserRoom(id, room)
   }
 
   leaveRoom (id) {
     userRepository.leaveRoom(id)
-  }
-
-  userConnect (id, username) {
-    userRepository.userConnect(id, username)
-    return this.getActiveUser(id)
   }
 }
 

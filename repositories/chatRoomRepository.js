@@ -12,7 +12,7 @@ class PrivateChatRoomRepository {
   }
 
   checkRoomAvailability (room) {
-    return this.chatRooms.has(room.toUpperCase())
+    return this.chatRooms.has(room)
   }
 }
 
