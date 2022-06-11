@@ -17,6 +17,14 @@ module.exports = (io, socket) => {
       'botMessage',
       `You Have Successfully Joined ${user.room.name} Room.`
     )
+
+    // loading history from the user
+    const history = await userService.getHistoryMessage(user._id, user.room._id)
+    console.log('history', history)
+
+    // send user history
+    io.to(socket.id).emit('botMessage', ``)
+
     // broadcast to the room
     socket
       .to(user.room.name)
@@ -55,7 +63,8 @@ module.exports = (io, socket) => {
       messages.push({
         socketId: socket.id,
         from: user._id,
-        to: user.room ? user.room._id : user.private,
+        to: user.private || null,
+        room: user.room ? user.room._id : null,
         dateTime: Date.now(),
         message: input
       })

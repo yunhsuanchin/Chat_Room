@@ -53,6 +53,12 @@ class PrivateUserService {
 
     await messageRepository.storeMessages(userMessage)
   }
+
+  async getHistoryMessage (userId, targetId) {
+    const result = await messageRepository.getHistoryMessage(userId, targetId)
+
+    return result
+  }
 }
 
 class UserService {

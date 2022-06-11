@@ -6,7 +6,16 @@ class PrivateMessageRepository {
   }
 
   storeMessages (userMessage) {
+    require('../../config/mongoose')
     return Message.insertMany(userMessage)
+  }
+
+  getHistoryMessage (userId, roomId) {
+    require('../../config/mongoose')
+    return Message.find({ from: userId, room: roomId })
+      .populate('to')
+      .populate('room')
+      .select(['to', 'room', 'dateTime', 'message'])
   }
 }
 
