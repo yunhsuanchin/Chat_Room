@@ -1,34 +1,68 @@
-const INIT_USERS = ['user001', 'user002', 'user003', 'user004']
-
-const currentUsers = []
+const User = require('../models/mongodb/user')
 
 class PrivateUserRepository {
   constructor () {
     this.message = 'I am an instance'
   }
 
-  getActiveUsers () {
-    return currentUsers
+  login (socketId, username, roomId) {
+    require('../config/mongoose')
+
+    return User.findOneAndUpdate(
+      { name: username },
+      { socketId, room: roomId },
+      { upsert: true }
+    )
   }
 
-  getActiveUser (id) {
-    return currentUsers.find(user => user.id === id)
+  joinRoom (socketId, roomId) {
+    require('../config/mongoose')
+
+    return User.findOneAndUpdate(
+      { socketId },
+      { room: roomId },
+      { new: true }
+    ).populate({ path: 'room' })
   }
 
-  userConnect (id, username, room) {
-    currentUsers.push({ id, username, room })
+  getTargetUserByName (name) {
+    require('../config/mongoose')
+
+    return User.findOne({
+      name,
+      socketId: { $exists: true, $ne: '' }
+    }).populate({
+      path: 'room'
+    })
   }
 
-  updateUserRoom (id, room) {
-    const user = this.getActiveUser(id)
-    user.room = room
+  getActiveUser (socketId) {
+    require('../config/mongoose')
+
+    return User.findOne({ socketId }).populate({
+      path: 'room'
+    })
   }
 
-  leaveRoom (id) {
-    const index = currentUsers.findIndex(user => user.id === id)
-    if (index !== -1) {
-      currentUsers.splice(index, 1)
-    }
+  leaveRoom (socketId) {
+    require('../config/mongoose')
+
+    return User.findOneAndDelete({ socketId })
+  }
+
+  updatePrivateStatus (targetUserId, userId) {
+    require('../config/mongoose')
+
+    return Promise.all([
+      User.updateOne(
+        { socketId: targetUserId },
+        { private: userId, room: null }
+      ),
+      User.updateOne(
+        { socketId: userId },
+        { private: targetUserId, room: null }
+      )
+    ])
   }
 }
 

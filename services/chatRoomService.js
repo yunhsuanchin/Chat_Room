@@ -5,10 +5,13 @@ class PrivateChatRoomService {
     this.message = 'I am an instance'
   }
 
-  async getAllChatRooms () {
-    const result = await chatRoomRepository.getAllChatRooms()
+  async getRoomId (roomName) {
+    const result = await chatRoomRepository.getRoomId(roomName)
+    return result
+  }
 
-    return result.map(r => ({ id: r._id, name: r.name }))
+  getAllChatRooms () {
+    return chatRoomRepository.getAllChatRooms()
   }
 
   checkRoomAvailability (room) {

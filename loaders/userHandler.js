@@ -1,55 +1,63 @@
 const userService = require('../services/userService')
 const chatRoomService = require('../services/chatRoomService')
-const helper = require('../utils/helpers.js')
 
 module.exports = (io, socket) => {
-  const onUserConnected = username => {
-    username = helper.formatInput(username)
-    userService.userConnect(socket.id, username, 'LOBBY')
+  const onUserConnected = async username => {
+    // enter lobby
+    await userService.login(socket.id, username, 'LOBBY')
   }
 
-  const onUserJoinRoom = room => {
-    console.log('userId', socket.id)
-    userService.updateUserRoom(socket.id, helper.formatInput(room))
-    const user = userService.getActiveUser(socket.id)
-    console.log({ user })
-    socket.join(user.room)
-    socket.to(room).emit('botMessage', `${user.username} Has Joined the Room.`)
+  const onUserJoinRoom = async roomId => {
+    // update user's room
+    const user = await userService.joinRoom(socket.id, roomId)
+
+    socket.join(user.room.name)
+    // broadcast to the room
+    socket
+      .to(user.room.name)
+      .emit('botMessage', `${user.name} Has Joined the Room.`)
   }
 
-  const onUserRequest = input => {
-    const name = helper.formatInput(input)
-    const user = userService.getActiveUser(socket.id)
-    const currentUsers = userService.getActiveUsers()
-    const targetUser = currentUsers.find(
-      user => user.username === name && user.id !== socket.id
-    )
+  const onUserRequest = async input => {
+    console.log('socket', socket.id)
+    const [user, targetUser] = await Promise.all([
+      userService.getActiveUser(socket.id),
+      userService.getTargetUserByName(input)
+    ])
 
-    console.log({ user, currentUsers, targetUser })
+    console.log({ user, targetUser })
 
-    // calling someone
-    if (targetUser && targetUser.room === 'LOBBY') {
-      // get this person to private room
-      userService.updateUserRoom(targetUser.id, socket.id)
-      userService.updateUserRoom(socket.id, targetUser.id)
+    if (targetUser && targetUser.room.name === 'LOBBY') {
+      console.log('1')
+      // update user's room & private connection
+      await userService.updatePrivateStatus(targetUser.socketId, user.socketId)
 
-      console.log('2', { user, currentUsers, targetUser })
-
-      // start private chat
-      socket
-        .to(user.room)
-        .emit('botMessage', `You Can Start Chatting With ${user.username} Now.`)
-      socket
-        .to(targetUser.room)
-        .emit(
-          'botMessage',
-          `You Can Start Chatting With ${targetUser.username} Now.`
-        )
+      io.to(targetUser.socketId).emit(
+        'botMessage',
+        `${user.name} Invited You To A Private Chat.`
+      )
+      io.to(user.socketId).emit(
+        'botMessage',
+        `${targetUser.name} Is Available Now, You Could Start Chatting.`
+      )
+    } else if ((user.room && user.room.name !== 'LOBBY') || user.private) {
+      // chatting with existing room
+      console.log('2')
+      const target = user.room ? user.room.name : user.private
+      console.log({ target })
+      socket.broadcast.to(target).emit('chatMessage', input)
     } else {
-      // talking to the room
-      console.log('chatting')
-      socket.to(user.room).emit('chatMessage', input)
+      console.log('3')
+      // throw unavailable message
+      io.to(user.socketId).emit(
+        'botMessage',
+        `${input} Is Busy Now, You Might Try Again Later.`
+      )
     }
+  }
+
+  const onClientDisconnected = async () => {
+    await userService.leaveRoom(socket.id)
   }
 
   // const onGroupChat = input => {
@@ -87,9 +95,7 @@ module.exports = (io, socket) => {
   //   //   sender: socket.id
   //   // })
   // }
-  // const onClose = () => {
-  //   console.log('close', socket.id)
-  // }
+
   socket.on('userConnected', onUserConnected)
   socket.on('joinRoom', onUserJoinRoom)
   socket.on('userRequest', onUserRequest)
@@ -97,5 +103,5 @@ module.exports = (io, socket) => {
   // socket.on('disconnect', onUserDisconnected)
   // socket.on('privateChatRequest', onPrivateChatRequest)
   // socket.on('privateRoom', onPrivateRoom)
-  // socket.conn.on('close', onClose)
+  socket.conn.on('close', onClientDisconnected)
 }

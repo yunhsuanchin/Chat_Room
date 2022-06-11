@@ -1,29 +1,47 @@
+const chatRoomService = require('../services/chatRoomService')
 const userRepository = require('../repositories/userRepository')
+const helper = require('../utils/helpers')
 
 class PrivateUserService {
   constructor () {
     this.message = 'I am an instance'
   }
 
-  getActiveUsers () {
-    return userRepository.getActiveUsers()
+  async login (socketId, username, roomId) {
+    if (roomId === 'LOBBY') {
+      const lobbyId = await chatRoomService.getRoomId('LOBBY')
+      roomId = lobbyId
+    }
+
+    username = helper.formatInput(username)
+    await userRepository.login(socketId, username, roomId)
   }
 
-  getActiveUser (id) {
-    return userRepository.getActiveUser(id)
+  async joinRoom (socketId, roomId) {
+    const user = await userRepository.joinRoom(socketId, roomId)
+
+    return user
   }
 
-  userConnect (id, username, room) {
-    userRepository.userConnect(id, username, room)
-    console.log('currentUsers', this.getActiveUsers())
+  async getTargetUserByName (name) {
+    name = helper.formatInput(name)
+    const user = await userRepository.getTargetUserByName(name)
+
+    return user
   }
 
-  updateUserRoom (id, room) {
-    userRepository.updateUserRoom(id, room)
+  async getActiveUser (socketId) {
+    const user = await userRepository.getActiveUser(socketId)
+
+    return user
   }
 
-  leaveRoom (id) {
-    userRepository.leaveRoom(id)
+  async leaveRoom (socketId) {
+    await userRepository.leaveRoom(socketId)
+  }
+
+  async updatePrivateStatus (targetUserId, userId) {
+    await userRepository.updatePrivateStatus(targetUserId, userId)
   }
 }
 

@@ -30,10 +30,10 @@ const onConnection = socket => {
 
 Promise.all([pubClient.connect(), subClient.connect()]).then(() => {
   io.adapter(createAdapter(pubClient, subClient))
-  // io.listen(PORT)
+  io.listen(httpServer)
   io.on('connection', onConnection)
 })
 
-app.listen(PORT, () => {
-  console.log('listening')
+httpServer.listen(PORT, () => {
+  console.log(`listening on port ${PORT}`)
 })

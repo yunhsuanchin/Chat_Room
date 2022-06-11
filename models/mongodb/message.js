@@ -2,8 +2,8 @@ const mongoose = require('mongoose')
 const { Schema } = mongoose
 
 const messageSchema = new Schema({
-  from: Schema.Types.ObjectId,
-  to: Schema.Types.ObjectId,
+  from: { type: Schema.Types.ObjectId, ref: 'User' },
+  to: { type: Schema.Types.ObjectId, ref: 'User' },
   dateTime: Date,
   message: String
 })

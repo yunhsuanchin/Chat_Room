@@ -10,6 +10,11 @@ class PrivateChatRoomRepository {
     return ChatRoom.find().lean()
   }
 
+  getRoomId (roomName) {
+    require('../config/mongoose')
+    return ChatRoom.findOne({ name: roomName })
+  }
+
   getChatRoomById (room) {
     return this.chatRooms.has(room)
   }

@@ -3,9 +3,9 @@ const readline = require('readline').createInterface({
   input: process.stdin,
   output: process.stdout
 })
+
 const clientMessage = require('./src/messages/clientMessages')
 const chatRoomService = require('./services/chatRoomService')
-const currentChatRooms = chatRoomService.getCurrentChatRooms()
 
 const socket = io('http://localhost:3000')
 
@@ -114,14 +114,18 @@ const onConnection = () => {
 //   })
 // }
 
-readline.on('line', content => {
+readline.on('line', async content => {
+  const rooms = await chatRoomService.getAllChatRooms()
+  const currentRooms = rooms.map(r => r.name)
   const roomName = content.trim().toUpperCase()
 
   if (roomName === 'ROOM') {
-    console.log(clientMessage.topicQuestion(currentChatRooms))
-  } else if (currentChatRooms.includes(roomName)) {
+    // render room list
+    console.log(clientMessage.topicQuestion(currentRooms))
+  } else if (currentRooms.includes(roomName)) {
+    const selectedRoom = rooms.find(room => room.name === roomName)
     // enter room
-    socket.emit('joinRoom', roomName)
+    socket.emit('joinRoom', selectedRoom._id)
   } else {
     // handle other answers
     socket.emit('userRequest', content)
@@ -129,11 +133,9 @@ readline.on('line', content => {
 })
 
 socket.on('connect', onConnection)
-
 socket.on('chatMessage', message => {
   console.log(message)
 })
-
 socket.on('botMessage', message => {
   console.log(message)
 })
