@@ -1,4 +1,4 @@
-const ChatRoom = require('../models/mongodb/chatRoom')
+const ChatRoom = require('../../models/mongodb/chatRoom')
 
 class PrivateChatRoomRepository {
   constructor () {
@@ -6,12 +6,12 @@ class PrivateChatRoomRepository {
   }
 
   getAllChatRooms () {
-    require('../config/mongoose')
+    require('../../config/mongoose')
     return ChatRoom.find().lean()
   }
 
   getRoomId (roomName) {
-    require('../config/mongoose')
+    require('../../config/mongoose')
     return ChatRoom.findOne({ name: roomName })
   }
 

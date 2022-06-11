@@ -1,4 +1,4 @@
-const chatRoomRepository = require('../repositories/chatRoomRepository')
+const chatRoomRepository = require('../repositories/mongoDB/chatRoomRepository')
 
 class PrivateChatRoomService {
   constructor () {

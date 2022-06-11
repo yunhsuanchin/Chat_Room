@@ -1,4 +1,4 @@
-const User = require('../models/mongodb/user')
+const User = require('../../models/mongodb/user')
 
 class PrivateUserRepository {
   constructor () {
@@ -6,7 +6,7 @@ class PrivateUserRepository {
   }
 
   login (socketId, username, roomId) {
-    require('../config/mongoose')
+    require('../../config/mongoose')
 
     return User.findOneAndUpdate(
       { name: username },
@@ -16,7 +16,7 @@ class PrivateUserRepository {
   }
 
   joinRoom (socketId, roomId) {
-    require('../config/mongoose')
+    require('../../config/mongoose')
 
     return User.findOneAndUpdate(
       { socketId },
@@ -26,7 +26,7 @@ class PrivateUserRepository {
   }
 
   getTargetUserByName (name) {
-    require('../config/mongoose')
+    require('../../config/mongoose')
 
     return User.findOne({
       name,
@@ -37,7 +37,7 @@ class PrivateUserRepository {
   }
 
   getActiveUser (socketId) {
-    require('../config/mongoose')
+    require('../../config/mongoose')
 
     return User.findOne({ socketId }).populate({
       path: 'room'
@@ -45,13 +45,16 @@ class PrivateUserRepository {
   }
 
   leaveRoom (socketId) {
-    require('../config/mongoose')
+    require('../../config/mongoose')
 
-    return User.findOneAndDelete({ socketId })
+    return User.findOneAndUpdate(
+      { socketId },
+      { socketId: '', room: null, private: '' }
+    )
   }
 
   updatePrivateStatus (targetUserId, userId) {
-    require('../config/mongoose')
+    require('../../config/mongoose')
 
     return Promise.all([
       User.updateOne(

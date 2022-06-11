@@ -1,5 +1,6 @@
 const chatRoomService = require('../services/chatRoomService')
-const userRepository = require('../repositories/userRepository')
+const userRepository = require('../repositories/mongoDB/userRepository')
+const messageRepository = require('../repositories/mongoDB/messageRepository')
 const helper = require('../utils/helpers')
 
 class PrivateUserService {
@@ -42,6 +43,15 @@ class PrivateUserService {
 
   async updatePrivateStatus (targetUserId, userId) {
     await userRepository.updatePrivateStatus(targetUserId, userId)
+  }
+
+  async storeMessages (userMessage) {
+    userMessage = userMessage.map(m => {
+      const { socketId, ...rest } = m
+      return rest
+    })
+
+    await messageRepository.storeMessages(userMessage)
   }
 }
 

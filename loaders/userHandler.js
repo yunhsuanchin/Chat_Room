@@ -1,5 +1,5 @@
 const userService = require('../services/userService')
-const chatRoomService = require('../services/chatRoomService')
+const messages = []
 
 module.exports = (io, socket) => {
   const onUserConnected = async username => {
@@ -12,6 +12,11 @@ module.exports = (io, socket) => {
     const user = await userService.joinRoom(socket.id, roomId)
 
     socket.join(user.room.name)
+    // message to the user
+    io.to(socket.id).emit(
+      'botMessage',
+      `You Have Successfully Joined ${user.room.name} Room.`
+    )
     // broadcast to the room
     socket
       .to(user.room.name)
@@ -45,6 +50,15 @@ module.exports = (io, socket) => {
       console.log('2')
       const target = user.room ? user.room.name : user.private
       console.log({ target })
+
+      // store messages to temp array
+      messages.push({
+        socketId: socket.id,
+        from: user._id,
+        to: user.room ? user.room._id : user.private,
+        dateTime: Date.now(),
+        message: input
+      })
       socket.broadcast.to(target).emit('chatMessage', input)
     } else {
       console.log('3')
@@ -57,7 +71,15 @@ module.exports = (io, socket) => {
   }
 
   const onClientDisconnected = async () => {
-    await userService.leaveRoom(socket.id)
+    // store user's message to db
+    console.log({ messages })
+    const userMessage = messages.filter(m => m.socketId === socket.id)
+    console.log({ userMessage })
+
+    await Promise.all([
+      userService.leaveRoom(socket.id),
+      userService.storeMessages(userMessage)
+    ])
   }
 
   // const onGroupChat = input => {
