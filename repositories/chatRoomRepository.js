@@ -1,17 +1,16 @@
-const INIT_ROOM_TOPICS = ['MUSIC', 'LIFESTYLE', 'SPORTS', 'JOBS', 'NEWS']
+const ChatRoom = require('../models/mongodb/chatRoom')
 
 class PrivateChatRoomRepository {
   constructor () {
     this.message = 'I am an instance'
-
-    this.chatRooms = new Set(INIT_ROOM_TOPICS)
   }
 
-  getCurrentChatRooms () {
-    return Array.from(this.chatRooms)
+  getAllChatRooms () {
+    require('../config/mongoose')
+    return ChatRoom.find().lean()
   }
 
-  checkRoomAvailability (room) {
+  getChatRoomById (room) {
     return this.chatRooms.has(room)
   }
 }

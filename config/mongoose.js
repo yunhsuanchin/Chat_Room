@@ -11,6 +11,7 @@ class MongooseConnect {
       useUnifiedTopology: true
     })
 
+    console.log('db connect')
     return mongoose.connection
   }
 }
