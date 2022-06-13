@@ -4,7 +4,7 @@
   "description": "Realtime chat app",
   "main": "app.js",
   "scripts": {
-    "dev": "nodemon app.js",
+    "dev": "NODE_ENV=development nodemon app.js",
     "start": "node app.js",
     "seed": "node models/mongodb/seeds/seeders.js",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -14,6 +14,7 @@
   "dependencies": {
     "@socket.io/redis-adapter": "^7.2.0",
     "cors": "^2.8.5",
+    "dotenv": "^16.0.1",
     "express": "^4.18.1",
     "mongoose": "^6.3.6",
     "redis": "^4.1.0",
