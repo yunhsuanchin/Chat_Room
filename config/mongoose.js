@@ -1,6 +1,5 @@
 const mongoose = require('mongoose')
 const config = require('./config').mongodb
-console.log({ config })
 
 class MongooseConnect {
   constructor () {

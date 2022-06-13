@@ -1,0 +1,42 @@
+version: '3.8'
+services:
+  mongodb:
+    image: mongo
+    container_name: mongodb
+    restart: always
+    ports:
+      - 27017:27017
+    volumes:
+      - ./tmp/data/db:/data/db
+    environment:
+      MONGODB_URI: mongodb://mongodb:27017/chat
+
+  redis:
+    image: redis
+    container_name: redis
+    restart: always
+    ports:
+      - 6379:6379
+    volumes:
+      - ./redis.conf:/usr/local/etc/redis/redis.conf
+    environment:
+      REDIS_HOST: redis://localhost:6379
+
+  myapp:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: myapp
+    volumes:
+      - ./:/app
+      - /app/node_modules
+    environment:
+      MONGODB_URI: mongodb://mongodb:27017/chat
+      REDIS_HOST: redis://localhost:6379
+    ports:
+      - "3000:3000"
+    depends_on:
+      - mongodb
+      - redis
+    tty: true
+    stdin_open: true

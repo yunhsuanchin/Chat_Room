@@ -1,9 +1,9 @@
 if (process.env.NODE_ENV === 'production') {
-  require('dotenv').config({ path: './config/env/.env.prod' })
+  require('dotenv').config({ path: './config/env/.prod.env' })
 } else if (process.env.NODE_ENV === 'development') {
-  require('dotenv').config({ path: './config/env/.env.dev' })
+  require('dotenv').config({ path: './config/env/.dev.env' })
 } else {
-  require('dotenv').config({ path: './config/env/.env.dev' })
+  require('dotenv').config({ path: './config/env/.dev.env' })
 }
 
 const express = require('express')
@@ -13,7 +13,7 @@ const { createAdapter } = require('@socket.io/redis-adapter')
 const { createClient } = require('redis')
 const userHandler = require('./loaders/userHandler')
 const router = require('./routers')
-const responseHandler = require('./middlewares/responseHandler')
+const responseHandler = require('./middleware/responseHandler')
 const config = require('./config/config').redis
 
 const PORT = 3000
@@ -30,19 +30,27 @@ const io = new Server(httpServer, {
 app.use(router)
 app.use(responseHandler)
 
-const pubClient = createClient({ url: `${config.host}:${config.port}` })
-const subClient = pubClient.duplicate()
-
 const onConnection = socket => {
   userHandler(io, socket)
 }
 
-Promise.all([pubClient.connect(), subClient.connect()]).then(() => {
+io.listen(httpServer)
+io.on('connection', onConnection)
+
+const redisConnection = async () => {
+  console.log('config:', config.host)
+
+  const pubClient = createClient({ url: config.host })
+  const subClient = pubClient.duplicate()
+
+  await Promise.all([pubClient.connect(), subClient.connect()])
   io.adapter(createAdapter(pubClient, subClient))
+}
+
+httpServer.listen(PORT, async () => {
+  console.log(`listening on port ${PORT}`)
+
+  await redisConnection()
   io.listen(httpServer)
   io.on('connection', onConnection)
-})
-
-httpServer.listen(PORT, () => {
-  console.log(`listening on port ${PORT}`)
 })

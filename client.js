@@ -1,3 +1,11 @@
+if (process.env.NODE_ENV === 'production') {
+  require('dotenv').config({ path: './config/env/.prod.env' })
+} else if (process.env.NODE_ENV === 'development') {
+  require('dotenv').config({ path: './config/env/.dev.env' })
+} else {
+  require('dotenv').config({ path: './config/env/.dev.env' })
+}
+
 const { io } = require('socket.io-client')
 const readline = require('readline').createInterface({
   input: process.stdin,
@@ -22,97 +30,6 @@ const onConnection = () => {
     }, 500)
   })
 }
-
-// const handlePurposeSelected = (answer, userId, username) => {
-//   const room = currentChatRooms.find(
-//     room => answer.trim().toUpperCase() === room
-//   )
-//   if (room) {
-//     // group chat
-//     socket.emit('joinRoom', {
-//       username,
-//       room
-//     })
-//   } else {
-//     socket.emit('privateChatRequest', {
-//       username,
-//       room
-//     })
-//   }
-//   // if (answer.toUpperCase() === 'A') {
-//   //   handlePrivateChatRequest()
-//   // } else if (answer.toUpperCase() === 'B') {
-//   //   handleChatRoom(userId)
-//   // } else {
-//   //   console.log(clientMessage.invalidWarningMsg)
-//   //   setTimeout(() => {
-//   //     readline.question(clientMessage.purposeQuestion(), handlePurposeSelected)
-//   //   }, 500)
-//   // }
-// }
-
-// const handlePrivateChatRequest = () => {
-//   // get active users
-//   socket.emit('privateChatRequest', res => {
-//     if (res.availablePeople.length) {
-//       // select a user to chat with
-//       const usernames = res.availablePeople.map(user => user.username)
-//       readline.question(clientMessage.usersList(usernames), inputName => {
-//         const selectedUser = res.availablePeople.find(
-//           user => user.username === inputName.trim().toUpperCase()
-//         )
-
-//         console.log('selectedUser', selectedUser)
-
-//         // start private chat
-//         handlePrivateChat(selectedUser.id, selectedUser.username)
-//       })
-//     } else {
-//       console.log(clientMessage.noUserMsg)
-//       setTimeout(() => {
-//         handleChatRoom()
-//       }, 500)
-//     }
-//   })
-// }
-
-// const handlePrivateChat = (receiverId, receiverName) => {
-//   console.log(clientMessage.talkToSomeone(receiverName))
-//   console.log({ receiverId, receiverName })
-
-//   // enter private room
-//   socket.emit('privateRoom', receiverId)
-// }
-
-// // listen to user typing
-// readline.on('line', content => {
-//   socket.emit('groupChat', content)
-// })
-
-// // socket.on('privateMessage', ({ content, sender }) => {
-// //   console.log('socket', socket)
-// //   console.log(content)
-// // })
-
-// // readline.on('line', content => {
-// //   console.log('readline 2')
-// //   socket.emit('privateMessage', {
-// //     content,
-// //     receiverId
-// //   })
-// // })
-
-// const handleChatRoom = () => {
-//   // save user info
-//   const currentChatRooms = chatRoomService.getCurrentChatRooms()
-
-//   readline.question(clientMessage.topicQuestion(currentChatRooms), room => {
-//     socket.emit('joinRoom', {
-//       username,
-//       room
-//     })
-//   })
-// }
 
 readline.on('line', async content => {
   const rooms = await chatRoomService.getAllChatRooms()
