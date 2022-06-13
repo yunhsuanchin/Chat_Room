@@ -1,8 +1,10 @@
 const userService = require('../services/userService')
+const redisAdapter = require('../loaders/redisAdaptor')
 const messages = []
 
 module.exports = (io, socket) => {
   const onUserConnected = async username => {
+    await redisAdapter(io)
     // enter lobby
     await userService.login(socket.id, username, 'LOBBY')
   }

@@ -20,7 +20,7 @@ services:
     volumes:
       - ./redis.conf:/usr/local/etc/redis/redis.conf
     environment:
-      REDIS_HOST: redis://localhost:6379
+      REDIS_HOST: redis://redis:6379
 
   myapp:
     build:
@@ -32,9 +32,9 @@ services:
       - /app/node_modules
     environment:
       MONGODB_URI: mongodb://mongodb:27017/chat
-      REDIS_HOST: redis://localhost:6379
+      REDIS_HOST: redis://redis:6379
     ports:
-      - "3000:3000"
+      - 3000:3000
     depends_on:
       - mongodb
       - redis

@@ -19,3 +19,6 @@ package-lock.json
 logs/*
 
 .txt
+
+tmp
+redis.conf
