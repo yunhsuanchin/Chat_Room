@@ -1,10 +1,8 @@
 const userService = require('../services/userService')
-const redisAdapter = require('../loaders/redisAdaptor')
 const messages = []
 
 module.exports = (io, socket) => {
   const onUserConnected = async username => {
-    await redisAdapter(io)
     // enter lobby
     await userService.login(socket.id, username, 'LOBBY')
   }
@@ -21,8 +19,7 @@ module.exports = (io, socket) => {
     )
 
     // loading history from the user
-    const history = await userService.getHistoryMessage(user._id, user.room._id)
-    console.log('history', history)
+    // const history = await userService.getHistoryMessage(user._id, user.room._id)
 
     // send user history
     io.to(socket.id).emit('botMessage', ``)
@@ -34,16 +31,12 @@ module.exports = (io, socket) => {
   }
 
   const onUserRequest = async input => {
-    console.log('socket', socket.id)
     const [user, targetUser] = await Promise.all([
       userService.getActiveUser(socket.id),
       userService.getTargetUserByName(input)
     ])
 
-    console.log({ user, targetUser })
-
     if (targetUser && targetUser.room.name === 'LOBBY') {
-      console.log('1')
       // update user's room & private connection
       await userService.updatePrivateStatus(targetUser.socketId, user.socketId)
 
@@ -57,9 +50,7 @@ module.exports = (io, socket) => {
       )
     } else if ((user.room && user.room.name !== 'LOBBY') || user.private) {
       // chatting with existing room
-      console.log('2')
       const target = user.room ? user.room.name : user.private
-      console.log({ target })
 
       // store messages to temp array
       messages.push({
@@ -72,7 +63,6 @@ module.exports = (io, socket) => {
       })
       socket.broadcast.to(target).emit('chatMessage', input)
     } else {
-      console.log('3')
       // throw unavailable message
       io.to(user.socketId).emit(
         'botMessage',
@@ -83,9 +73,7 @@ module.exports = (io, socket) => {
 
   const onClientDisconnected = async () => {
     // store user's message to db
-    console.log({ messages })
     const userMessage = messages.filter(m => m.socketId === socket.id)
-    console.log({ userMessage })
 
     await Promise.all([
       userService.leaveRoom(socket.id),
@@ -93,48 +81,8 @@ module.exports = (io, socket) => {
     ])
   }
 
-  // const onGroupChat = input => {
-  //   console.log('onGroupChat', socket)
-  //   socket.to(socket.rooms).emit('chatMessage', input)
-  // }
-
-  // const onUserDisconnected = () => {
-  //   const user = userService.getActiveUser(socket.id)
-  //   if (user) {
-  //     socket
-  //       .to(user.room)
-  //       .emit('botMessage', `${user.username} Has Left the Room`)
-  //   }
-  // }
-
-  // // return active users
-  // const onPrivateChatRequest = async callback => {
-  //   const sockets = await io.fetchSockets()
-  //   const currentUsers = userService.getActiveUsers(sockets.map(s => s.id))
-  //   const otherUsers = currentUsers.filter(user => user.id !== socket.id)
-  //   callback({ availablePeople: otherUsers })
-  // }
-  // // create a room for private chat
-  // const onPrivateRoom = async receiverId => {
-  //   const roomId = helper.generateRandomAlphanumeric(10)
-  //   console.log({ receiverId, roomId })
-  //   io.in(receiverId).socketsJoin(roomId)
-  //   socket.join(roomId)
-  //   io.to(roomId).emit('botMessage', 'You being invited')
-  //   // const sockets = await io.fetchSockets()
-  //   // console.log({ sockets })
-  //   // socket.to(receiverId).emit('privateMessage', {
-  //   //   content,
-  //   //   sender: socket.id
-  //   // })
-  // }
-
   socket.on('userConnected', onUserConnected)
   socket.on('joinRoom', onUserJoinRoom)
   socket.on('userRequest', onUserRequest)
-  // socket.on('groupChat', onGroupChat)
-  // socket.on('disconnect', onUserDisconnected)
-  // socket.on('privateChatRequest', onPrivateChatRequest)
-  // socket.on('privateRoom', onPrivateRoom)
   socket.conn.on('close', onClientDisconnected)
 }
