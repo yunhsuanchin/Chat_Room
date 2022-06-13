@@ -34,48 +34,48 @@ total time spent: 20 hrs
 tokenize
 ├─ Dockerfile 
 ├─ README.md
-├─ app.js                                       project entry point
-├─ client.js                                          client server
-├─ config                       store env variables & db connection
+├─ app.js                                                project entry point
+├─ client.js                                                   client server
+├─ config                                store env variables & db connection
 │  ├─ config.js
 │  ├─ env
 │  └─ mongoose.js
-├─ controllers          could be developd as api service controller
+├─ controllers                   could be developd as api service controller
 │  └─ chatRoomController.js
 ├─ docker-compose.yml
-├─ loaders                              loaders for startup modules
+├─ loaders                                       loaders for startup modules
 │  ├─ redisAdaptor.js
-│  └─ userHandler.js
+│  └─ userHandler.js 
 ├─ middleware
 │  └─ responseHandler.js
-├─ models                                     database table schema
+├─ models                                              database table schema
 │  └─ mongodb
 │     ├─ chatRoom.js
 │     ├─ message.js
 │     ├─ seedData
 │     │  ├─ chatRoomData.json
 │     │  └─ userData.json
-│     ├─ seeds                                    mongodb seed data
+│     ├─ seeds                                             mongodb seed data
 │     │  └─ seeders.js
 │     └─ user.js
 ├─ package.json
-├─ repositories                                handle database CRUD
+├─ repositories                                         handle database CRUD
 │  └─ mongoDB
 │     ├─ chatRoomRepository.js
 │     ├─ messageRepository.js
 │     └─ userRepository.js
-├─ routers                                           router modules
+├─ routers                                                    router modules
 │  ├─ index.js
 │  └─ modules
 │     └─ chatRoom.js
-├─ services                                   handle business logic
+├─ services                                            handle business logic
 │  ├─ chatRoomService.js
 │  └─ userService.js
-├─ src                                                 source files
+├─ src                                                          source files
 │  └─ messages
 │     ├─ botMessages.js
-│     └─ clientMessages.js
-├─ utils                                           helper functions
+│     └─ clientMessages.js 
+├─ utils                                                    helper functions
 │  └─ helpers.js
 └─ wait-for-it.sh
 
