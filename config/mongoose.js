@@ -1,4 +1,6 @@
 const mongoose = require('mongoose')
+const config = require('./config').mongodb
+console.log({ config })
 
 class MongooseConnect {
   constructor () {
@@ -6,10 +8,7 @@ class MongooseConnect {
   }
 
   getInstance () {
-    mongoose.connect('mongodb://localhost:27017/chat', {
-      useNewUrlParser: true,
-      useUnifiedTopology: true
-    })
+    mongoose.connect(config.uri, config.options)
 
     return mongoose.connection
   }

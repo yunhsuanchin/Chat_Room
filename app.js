@@ -1,3 +1,9 @@
+if (process.env.NODE_ENV === 'production') {
+  require('dotenv').config({ path: './config/env/.env.prod' })
+} else if (process.env.NODE_ENV === 'development') {
+  require('dotenv').config({ path: './config/env/.env.dev' })
+}
+
 const express = require('express')
 const { createServer } = require('http')
 const { Server } = require('socket.io')
@@ -6,6 +12,7 @@ const { createClient } = require('redis')
 const userHandler = require('./loaders/userHandler')
 const router = require('./routers')
 const responseHandler = require('./middlewares/responseHandler')
+const config = require('./config/config').redis
 
 const PORT = 3000
 const app = express()
@@ -21,7 +28,7 @@ const io = new Server(httpServer, {
 app.use(router)
 app.use(responseHandler)
 
-const pubClient = createClient({ url: 'redis://localhost:6379' })
+const pubClient = createClient({ url: `${config.host}:${config.port}` })
 const subClient = pubClient.duplicate()
 
 const onConnection = socket => {
